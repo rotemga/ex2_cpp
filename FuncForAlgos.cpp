@@ -1,28 +1,73 @@
 #include "FuncForAlgos.h"
 
 
+//int sumDirt(const map <Point, char> m){
+//int sum = 0;
+//int i = 0;
+//for (map<Point, char>::const_iterator it = m.begin(); it != m.end(); ++it)
+//{
+//	i = charToDirtLevel(it->second);
+//	if (i > 0){
+//		sum += i;
+//	}
+//}
+//return sum;
+//
+//}
 
-int sumDirt(const map <Point, char> m){
-int sum = 0;
-int i = 0;
-for (map<Point, char>::const_iterator it = m.begin(); it != m.end(); ++it)
-{
-	i = charToDirtLevel(it->second);
-	if (i > 0){
-		sum += i;
+//int scoring(const map <Point, char> m, Point point, int CurrBattery, int ConRateBattery){
+//	int dust = charToDirtLevel(m.at(point));
+////	cout << "dust is: " << dust << endl;
+//	int addition = (dust >= 0) ? (dust) : ((dust == -1) ? -1 : 2);
+//	return (addition -(sumDirt(m)+50) + (canGoBackToDocking(m, point, CurrBattery, ConRateBattery) ? 100 : 0));
+//}
+
+
+Direction directionToDocking(map<Point, char> map_info, Point point, Point* wanted_point){
+	int x = point.getX(), y = point.getY();
+	map<Point, int> m;
+	legalMoves(map_info, point, m, 1);
+	if (x == 0 && y == 0) return Direction::Stay;
+	else if (y > 0){//need to go west
+		if (m.count(Point(x, y - 1))){
+			wanted_point->setPoint(x, y - 1);
+			return Direction::West;
+		}
+		return forDirectionToDockingFunc(x, y, m, wanted_point);
+
+
+	}
+	else if (y < 0){//nead to go east
+		if (m.count(Point(x, y + 1))){
+			wanted_point->setPoint(x, y + 1);
+			return Direction::East;
+		}
+		return forDirectionToDockingFunc(x, y, m, wanted_point);
+	}
+	else {
+		return forDirectionToDockingFunc(x, y, m, wanted_point);
+		//map<Point, int>::iterator it;
+		//it = m.begin();
+		//wanted_point->setPoint(it->first);
+		//return changePointToDirection(point, it->first);
 	}
 }
-return sum;
 
+Direction forDirectionToDockingFunc(int x,int y, map <Point, int> m, Point* wanted_point){
+	if (x > 0) {//need to go north
+		if (m.count(Point(x - 1, y))){
+			wanted_point->setPoint(x - 1, y);
+			return Direction::North;
+		}
+	}
+	else if (x < 0){//need to go south
+		if (m.count(Point(x + 1, y))){
+			wanted_point->setPoint(x + 1, y);
+			return Direction::South;
+		}
+	}
+	return Direction::Stay;
 }
-
-int scoring(const map <Point, char> m, Point point, int CurrBattery, int ConRateBattery){
-	int dust = charToDirtLevel(m.at(point));
-//	cout << "dust is: " << dust << endl;
-	int addition = (dust >= 0) ? (dust) : ((dust == -1) ? -1 : 2);
-	return (addition -(sumDirt(m)+50) + (canGoBackToDocking(m, point, CurrBattery, ConRateBattery) ? 100 : 0));
-}
-
 
 
 
@@ -37,15 +82,19 @@ bool canGoBackToDocking(map<Point, char> map_info, Point point, int currBattery,
 
 
 //return the length of the minimal path from current point to docking.
-int findMinPathToDocking(map<Point, char> map_info, Point point, int cnt, int ok){
+int findMinPathToDocking(map<Point, char> map_info, Point point,int cnt, int ok){
 
 	map<Point, int> m;
 	int min = map_info.size();
 
-	if (point.isInDocking() || (ok = 1)){
+	if (point.isInDocking()){
 		ok = 1;
 		return cnt;
 	}
+	if (ok == 1)
+		return cnt;
+	if (cnt >= min)
+		return cnt;
 	else{
 		legalMoves(map_info, point, m, 1);//update m to be only legal directions (no option to stay in place)
 		map<Point, int>::iterator it;
@@ -61,60 +110,60 @@ int findMinPathToDocking(map<Point, char> map_info, Point point, int cnt, int ok
 	return min;
 
 }
-//update wanted_point to be best point to move to it.
-int getBestMove(map<Point, char> map_info, Point point, Point* wanted_point, int currBattery, int conRateBattery, int BatteryRechargeRate, int depth, int steps, int cnt){
-	map<Point, int> m;
-	int tmp, max_score = 0;
-	int Scoring = 0;
-	//cout << endl << endl;
-	//printCurrMap(map_info);
-
-	if (cnt != 0) {
-		char c = static_cast<char>(map_info[point] - 1);
-	//	cout << "	" << map_info[point] << "	##########	" << c <<  endl;
-		if (charToDirtLevel(map_info[point]) > 0) { map_info[point] = c; }//we have dirt in current point
-		if ((charToDirtLevel(map_info[point]) == -1)) { currBattery += BatteryRechargeRate; } //we on docking station
-		else { currBattery -= conRateBattery; } //we not in docking 
-	}
-
-
-
-	//cout << "The depth is: " << depth << endl;
-	if ((depth == 0)){
-		Scoring = scoring(map_info, point, currBattery, conRateBattery);
-	//	cout << "CurrPoint is: (" << point.getX() << " ," << point.getY() << ")" << " we have in it :" << map_info[point] << endl;
-	//	cout << "The score is: " << Scoring << endl;
-		return Scoring;
-
-	}
-
-	else if ((currBattery <= 0) || (steps == 0)){
-		return scoring(map_info, point, currBattery, conRateBattery);
-
-	}
-	else {
-		legalMoves(map_info, point, m, 0);//update m to be only legal directions
-		//printMap(m, point);
-		map<Point, int>::iterator it;
-		for (it = m.begin(); it != m.end(); it++) {//iterate over all legal moves
-			//if ((cnt < 10) && (it->first == point))
-			//	continue;
-			if (steps > 0)	steps--;
-
-			tmp = getBestMove(map_info, it->first, wanted_point, currBattery, conRateBattery, BatteryRechargeRate, depth - 1, steps, cnt + 1);
-
-			if (max_score < tmp){
-				max_score = tmp;
-				wanted_point->setPoint(it->first);
-			
-			}
-
-		}
-	}
-
-	return max_score;
-
-}
+////update wanted_point to be best point to move to it.
+//int getBestMove(map<Point, char> map_info, Point point, Point* wanted_point, int currBattery, int conRateBattery, int BatteryRechargeRate, int depth, int steps, int cnt){
+//	map<Point, int> m;
+//	int tmp, max_score = 0;
+//	int Scoring = 0;
+//	//cout << endl << endl;
+//	//printCurrMap(map_info);
+//
+//	if (cnt != 0) {
+//		char c = static_cast<char>(map_info[point] - 1);
+//	//	cout << "	" << map_info[point] << "	##########	" << c <<  endl;
+//		if (charToDirtLevel(map_info[point]) > 0) { map_info[point] = c; }//we have dirt in current point
+//		if ((charToDirtLevel(map_info[point]) == -1)) { currBattery += BatteryRechargeRate; } //we on docking station
+//		else { currBattery -= conRateBattery; } //we not in docking 
+//	}
+//
+//
+//
+//	//cout << "The depth is: " << depth << endl;
+//	if ((depth == 0)){
+//		Scoring = scoring(map_info, point, currBattery, conRateBattery);
+//	//	cout << "CurrPoint is: (" << point.getX() << " ," << point.getY() << ")" << " we have in it :" << map_info[point] << endl;
+//	//	cout << "The score is: " << Scoring << endl;
+//		return Scoring;
+//
+//	}
+//
+//	else if ((currBattery <= 0) || (steps == 0)){
+//		return scoring(map_info, point, currBattery, conRateBattery);
+//
+//	}
+//	else {
+//		legalMoves(map_info, point, m, 0);//update m to be only legal directions
+//		//printMap(m, point);
+//		map<Point, int>::iterator it;
+//		for (it = m.begin(); it != m.end(); it++) {//iterate over all legal moves
+//			//if ((cnt < 10) && (it->first == point))
+//			//	continue;
+//			if (steps > 0)	steps--;
+//
+//			tmp = getBestMove(map_info, it->first, wanted_point, currBattery, conRateBattery, BatteryRechargeRate, depth - 1, steps, cnt + 1);
+//
+//			if (max_score < tmp){
+//				max_score = tmp;
+//				wanted_point->setPoint(it->first);
+//			
+//			}
+//
+//		}
+//	}
+//
+//	return max_score;
+//
+//}
 
 
 
@@ -183,15 +232,19 @@ char* DirectionToString(Direction d){
 
 
 //update wanted_point to be best point to move to it.
-Direction get_Move(map<Point, char> map_info, Point point, Point* wanted_point){
+Direction get_Move(map<Point, char> map_info, Point point, Point* wanted_point, int currBattery, int ConRateBattery, int Steps){
 	float max_score = -2, east = -2, west = -2, south = -2, north = -2, stay = 0;
 	int x = point.getX(), y = point.getY();
-	Direction direct;
 	map<Point, int> m;
-
 	legalMoves(map_info, point, m, 0);//update m to be only legal directions
 	if (m.size()==0)
 		return  Direction::Stay;
+	if (Steps != -1)
+		if (Steps*ConRateBattery <= currBattery)//if we don't have enough steps, we must go back to docking
+			return directionToDocking(map_info, point, wanted_point);
+
+	if ((currBattery <= (map_info.size()/2)))//if we don't have enough battery, we must go back to docking
+		return directionToDocking(map_info, point, wanted_point);
 
 	map<Point, int>::iterator it;
 	for (it = m.begin(); it != m.end(); it++) {//iterate over all legal moves
@@ -214,7 +267,7 @@ Direction get_Move(map<Point, char> map_info, Point point, Point* wanted_point){
 	}
 
 	max_score = std::max(std::max(east, west), std::max(std::max(south, north),stay));
-	if (max_score == 0){
+	if (max_score == 0){//if all legal direction with no dirt, check in which direction there are most stars
 		return mostStars(map_info, point, wanted_point);
 	}
 
@@ -253,7 +306,7 @@ Direction mostStars(map<Point, char> map_info, Point point, Point* wanted_point)
 	map<Point, char>::iterator it;
 	for (it = map_info.begin(); it != map_info.end(); it++) {
 		tmp = charToDirtLevel(it->second);
-		if ((it->first.getY() > y) && (tmp > 0 || tmp == -3)&& (map_info[Point(x,y+1)]!='W')){
+		if ((it->first.getY() > y) && (tmp > 0 || tmp == -3) && (map_info[Point(x, y + 1)] != 'W')){
 			east += ((tmp > 0) ? tmp : 2);
 		}
 		tmp = charToDirtLevel(it->second);
@@ -261,15 +314,20 @@ Direction mostStars(map<Point, char> map_info, Point point, Point* wanted_point)
 			west += ((tmp > 0) ? tmp : 2);
 		}
 		tmp = charToDirtLevel(it->second);
-		if ((it->first.getX() > x) && (tmp > 0 || tmp == -3) && (map_info[Point(x+1, y)] != 'W')){
+		if ((it->first.getX() > x) && (tmp > 0 || tmp == -3) && (map_info[Point(x + 1, y)] != 'W')){
 			south += ((tmp > 0) ? tmp : 2);
 		}
 		tmp = charToDirtLevel(it->second);
-		if ((it->first.getX() < x) && (tmp > 0 || tmp == -3) && (map_info[Point(x-1, y)] != 'W')){
+		if ((it->first.getX() < x) && (tmp > 0 || tmp == -3) && (map_info[Point(x - 1, y)] != 'W')){
 			north += ((tmp > 0) ? tmp : 2);
 		}
 	}
 	int max_score = std::max(std::max(east, west), std::max(south, north));
+	if (max_score == 0){
+		wanted_point->setPoint(map_info.begin()->first);
+		return  changePointToDirection(point, map_info.begin()->first);
+	}
+		
 	if (east == max_score){
 		wanted_point->setPoint(x, y + 1);
 		return  Direction::East;
@@ -385,4 +443,5 @@ int getDirt(House* house, Point* point, Direction direction){
 		return -2;
 	}
 }
+
 

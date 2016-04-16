@@ -24,11 +24,13 @@ Direction changePointToDirection(Point currPoint, Point newPoint);
 void legalMoves(map<Point, char> map_info, Point currPoint, map<Point, int> &m, int for_min_path);
 int charToDirtLevel(char c);
 int getBestMove(map<Point, char> map_info, Point point, Point* wanted_point, int currBattery, int conRateBattery, int BatteryRechargeRate, int depth, int steps, int cnt);
-Direction get_Move(map<Point, char> map_info, Point point, Point* wanted_point);
+Direction get_Move(map<Point, char> map_info, Point point, Point* wanted_point, int currBattery, int ConRateBattery, int Steps);
 char* DirectionToString(Direction d);
 void printMap(map<Point, int> m, Point point);
 int getMaxCoordinate(map<Point, char> m, int coordinate);
 char interputForPrint(char ch);
 void printCurrMap(map <Point, char> m);
 Direction mostStars(map<Point, char> map_info, Point point, Point* wanted_point);
+Direction directionToDocking(map<Point, char> map_info, Point point, Point* wanted_point);
+Direction forDirectionToDockingFunc(int x, int y, map <Point, int> m, Point* wanted_point);
 #endif /* MAXMAX_H_ */

@@ -5,7 +5,6 @@ _203246509_B::_203246509_B()
 {
 	thisSensor = new OurSensor();
 	currPoint = new Point(0, 0);//docking station is in (0,0)
-	//num_steps = 0;
 	StepsTillFinishing = -1;
 
 }
@@ -22,8 +21,7 @@ void _203246509_B::setSensor(const AbstractSensor& sensor){
 	SensorInformation a = sensor.sense();
 	thisSensor->setInfo(a);
 	updateMapInfo(a);
-	/*cout << "before:" << endl;
-	printCurrMap(map_info);*/
+
 
 
 }
@@ -38,16 +36,13 @@ void _203246509_B::setConfiguration(map<string, int> config){
 
 Direction _203246509_B::step(){
 	Point* wanted_point = new Point(0, 0);
-	//int bestMove = getBestMove(map_info, *currPoint, wanted_point, CurrBattery, ConRateBattery, BatteryRechargeRate, 10, StepsTillFinishing,0);
-	//Direction direct = changePointToDirection(*currPoint, *wanted_point);
-	//currPoint->setPoint(*wanted_point);
-
-	Direction direct =  get_Move(map_info, *currPoint, wanted_point);
-	//if (charToDirtLevel(map_info[*wanted_point]) > 0 ){
-	//	char c = static_cast<char>(map_info[*wanted_point] - 1);
-	//	map_info[*wanted_point] = c;
-	//}
+	Direction direct =  get_Move(map_info, *currPoint, wanted_point, CurrBattery,ConRateBattery, StepsTillFinishing);
 	currPoint->setPoint(*wanted_point);
+	if (currPoint->isInDocking())
+		CurrBattery += BatteryRechargeRate;
+	else
+		CurrBattery -= ConRateBattery;
+
 	cout << "after:" << endl;
 	printCurrMap(map_info);
 	delete wanted_point;

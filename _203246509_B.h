@@ -17,7 +17,6 @@ class _203246509_B :
 	int CurrBattery;
 	int ConRateBattery;
 	int BatteryRechargeRate;
-	//static int num_steps;
 	int StepsTillFinishing;
 
 
