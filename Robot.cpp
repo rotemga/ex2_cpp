@@ -27,11 +27,13 @@ void Robot::runRobot() {
 			score.setPosition(10);
 			return;
 		}
-		algo->setSensor(*sensor);
+	//	algo->setSensor(*sensor);
 
 		Direction direction = algo->step(); //should check if direction is legal
 		cout << "Direction: " << this->DirectionToString(direction) << endl << endl;
 		position->move(direction);
+		sensor->setPoint(position);
+
 		if (crashedToWall(*position)) {
 			canRun = false;
 			brokedDown = true;
