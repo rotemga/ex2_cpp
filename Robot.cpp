@@ -30,7 +30,7 @@ void Robot::runRobot() {
 		//	algo->setSensor(*sensor);
 
 		Direction direction = algo->step(); //should check if direction is legal
-											//cout << "Direction: " << this->DirectionToString(direction) << endl << endl;
+											
 		position->move(direction);
 		sensor->setPoint(position);
 

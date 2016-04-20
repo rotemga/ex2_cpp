@@ -87,7 +87,7 @@ void Simulator::run(vector<string> algoNames,vector<string> houseNames) {
 			Robot* robot = new Robot(tmp_house, algorithms[j], tmp_point, battery);
 			robots.push_back(robot);
 		}
-		houses[i]->output();
+		//houses[i]->output();
 		while (Steps > 0) {//each iteration simulate each robot one step
 			for (vector<Robot*>::size_type k = i*algorithms.size(); k != robots.size(); k++) {
 				if (!robots[k]->isCanRun())
@@ -155,19 +155,15 @@ void Simulator::run(vector<string> algoNames,vector<string> houseNames) {
 			}
 
 		}
-		for (vector<Robot*>::size_type k = i*algorithms.size(); k != robots.size(); k++) {
+		//for (vector<Robot*>::size_type k = i*algorithms.size(); k != robots.size(); k++) {
 
-			Score s = robots[k]->getScore();
-			cout << s.calcResult() << endl;
-		}
+		//	Score s = robots[k]->getScore();
+		//	cout << s.calcResult() << endl;
+		//}
 
 	}
 
-	for (vector<Robot*>::size_type k = 0; k != robots.size(); k++) {
 
-		Score s = robots[k]->getScore();
-		cout << "robot num " << k << " score: " << s.calcResult() << endl;
-	}
 
 	Table table(houseNames, algoNames, robots);
 	table.printTable();

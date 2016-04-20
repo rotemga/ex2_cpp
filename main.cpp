@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 		algos.push_back(loadedAlgo);
 	}
 	int numberOfValidAlgo = algos.size();
-	cout << numberOfValidHouses << numberOfValidAlgo << endl;
+//	cout << numberOfValidHouses << numberOfValidAlgo << endl;
 	if (numberOfValidAlgo && numberOfValidHouses) {
 		Simulator sim(houses, algos, config);
 		vector<string> algoOnlyNames, houseonlyNames;

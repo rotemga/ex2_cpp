@@ -5,18 +5,7 @@
 #define ALGO_COMMAND "-algorithm_path"
 #define CONFIG_PATH "-config"
 
-//http://stackoverflow.com/questions/478898/how-to-execute-a-command-and-get-output-of-command-within-c-using-posix
-std::string exec(const char* cmd) {
-	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-	if (!pipe) return "ERROR";
-	char buffer[128];
-	std::string result = "";
-	while (!feof(pipe.get())) {
-		if (fgets(buffer, 128, pipe.get()) != NULL)
-			result += buffer;
-	}
-	return result;
-}
+
 
 bool hasEnding(string const &fullString, string const &ending) {
 	if (fullString.length() >= ending.length()) {

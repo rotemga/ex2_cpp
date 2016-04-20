@@ -185,15 +185,7 @@ int SharedAlgorithm::findMinPathToDocking(int cnt, int ok) {
 }
 
 
-void SharedAlgorithm::printMap(map<Point, int> m, Point point) {
-	cout << "CurrPoint is: (" << point.getX() << " ," << point.getY() << ")" << " we have in it :" << m[point] << endl;
-	map<Point, int>::iterator it;
-	cout << "Size of Map: " << m.size() << " ,legal moves: ";
-	for (it = m.begin(); it != m.end(); it++) {
-		cout << DirectionToString(changePointToDirection(it->first)) << " (" << it->first.getX() << " ," << it->first.getY() << ")" << "   ";
-	}
-	cout << endl;
-}
+
 
 
 
@@ -223,28 +215,7 @@ void SharedAlgorithm::printCurrMap(map <Point, char> m) {
 	}
 }
 
-//get direction and return char* of it
-char* SharedAlgorithm::DirectionToString(Direction d) {
-	switch (d) {
-	case Direction::East:
-		return "East";
 
-	case Direction::West:
-		return "West";
-
-	case Direction::South:
-		return "South";
-
-	case Direction::North:
-		return "North";
-
-	case Direction::Stay:
-		return "Stay";
-
-	default: return "Stay";
-	}
-	return "Stay";
-}
 
 
 
@@ -272,7 +243,7 @@ Direction SharedAlgorithm::get_Move(Point* wanted_point, float score_for_star) {
 			return reverseDirection(direct, wanted_point);
 		}
 	}
-	if (moves.size()*ConRateBattery + 1 >= CurrBattery) {//(CurrBattery <= (map_info.size() / 2)))//if we don't have enough battery, we must go back to docking
+	if (static_cast<int>(moves.size())*ConRateBattery + 1 >= CurrBattery) {//(CurrBattery <= (map_info.size() / 2)))//if we don't have enough battery, we must go back to docking
 		num_of_steps++;
 		//return directionToDocking(wanted_point);
 		direct = moves[moves.size() - 1];
@@ -337,7 +308,6 @@ Direction SharedAlgorithm::get_Move(Point* wanted_point, float score_for_star) {
 Direction SharedAlgorithm::mostStars(Point* wanted_point) {
 	int x = currPoint->getX(), y = currPoint->getY();
 	int tmp, east = 0, west = 0, south = 0, north = 0;
-	Direction direct;
 	map<Point, int> m;
 
 
