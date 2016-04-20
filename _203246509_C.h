@@ -8,4 +8,3 @@ class _203246509_C :
 public:
 	virtual Direction step() override;
 };
-

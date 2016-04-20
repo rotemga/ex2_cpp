@@ -1,37 +1,21 @@
 #include "FuncForMain.h"
+#include <memory>
+#include <cstdio>
+#define HOUSE_COMMAND "-house_path"
+#define ALGO_COMMAND "-algorithm_path"
+#define CONFIG_PATH "-config"
 
-void createSimple1()
-{
-	std::cout << "Creating file: simple1.txt" << endl;
-	ofstream fout("simple1.txt");
-	fout << "Simple1" << endl;
-	fout << "2 Bedrooms + Kitchen Isle" << endl;
-	fout << 8 << endl;
-	fout << 10 << endl;
-	fout << "WWWWWWWWWW" << endl;
-	fout << "W22  DW59W" << endl;
-	fout << "W  W 1119W" << endl;
-	fout << "W WWW3WW W" << endl;
-	fout << "W6   3W  W" << endl;
-	fout << "W78W  W  W" << endl;
-	fout << "W99W  W  W" << endl;
-	fout << "WWWWWWWWWW" << endl;
-	fout.close();
-}
-
-void writeConfigFile(const string &iniPath)
-{
-	ofstream fout(iniPath.c_str());
-	fout << "BatteryConsumptionRate  =    1" << endl;
-	fout << "MaxSteps   = 1200" << endl;
-	fout << "MaxStepsAfterWinner=200" << endl;
-	fout << "BatteryCapacity=400" << endl;
-	fout << "BatteryRachargeRate=20" << endl;
-	fout.close();
-
-	ifstream fin(iniPath.c_str());
-	string line;
-
+//http://stackoverflow.com/questions/478898/how-to-execute-a-command-and-get-output-of-command-within-c-using-posix
+std::string exec(const char* cmd) {
+	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+	if (!pipe) return "ERROR";
+	char buffer[128];
+	std::string result = "";
+	while (!feof(pipe.get())) {
+		if (fgets(buffer, 128, pipe.get()) != NULL)
+			result += buffer;
+	}
+	return result;
 }
 
 bool hasEnding(string const &fullString, string const &ending) {
@@ -60,9 +44,15 @@ string ConvertHouseStatetoString(houseState state) {
 	return msg;
 }
 
-void PrintErrors(map<string, string> errorMap) {
+void createVcetorFromMapValues(vector <string>& vec, map<string, string> m,map<string,string> errorMap) {
+	for (auto elem : m)
+		if (errorMap.find(elem.first) == errorMap.end())
+		vec.push_back(elem.second);
+}
+
+void PrintErrors(map<string, string> errorMap,map<string,string> nameMap,string typefile) {
 	for (auto it = errorMap.cbegin(); it != errorMap.cend(); ++it) {
-		cout << "file name" << it->first << "problem : " << it->second << endl;
+		cout  << nameMap[it->first] << "." << typefile <<  ": " <<  it->second << endl;
 	}
 }
 
@@ -94,7 +84,7 @@ bool checkConfig(string fileName, map<string, int>* config) {
 	}
 	*config = iniParser.getMap();
 	vector<string> confiVector = { "MaxStepsAfterWinner",
-		"BatteryCapacity", "BatteryConsumptionRate",
+		"BatteryCapacity",  "BatteryConsumptionRate",
 		"BatteryRechargeRate" };
 	vector<bool> checkAllConfi(confiVector.size());
 	checkVectorByMap(*config, confiVector, &checkAllConfi);
@@ -107,57 +97,57 @@ bool checkConfig(string fileName, map<string, int>* config) {
 	return true;
 }
 
-void findHousesAndConfigFiles(vector<fs::path> fileName_currDir, vector<string>* houses_fileName, string& config_fileName,
-	bool input_config, bool input_house, vector<string>* houseOnlyName) {
-	for (vector<string>::size_type j = 0; j != fileName_currDir.size(); j++) {
-		if ((hasEnding(fileName_currDir[j].string(), ".ini") && (input_config))) {
-			config_fileName = fileName_currDir[j].string();
-		}
-		else if ((hasEnding(fileName_currDir[j].string(), ".house") && (input_house))) {
-			(*houses_fileName).push_back(fileName_currDir[j].string());
-			(*houseOnlyName).push_back(fileName_currDir[j].stem().string());
-		}
-	}
-}
-int checkHouses(vector<string> houseNames, vector<House*>* houses, map<string, string>* errorHouse) {
-	string stringErrorMSGHouse("");
-	for (vector<string>::size_type j = 0; j != houseNames.size(); j++) {
+int checkHouses(map<string,string> houseNames, vector<House*>* houses, map<string, string>* errorHouse) {
+	string stringErrorMSGHouse;
+	for (auto houseName : houseNames) {
 		House *house = new House();
-		stringErrorMSGHouse = house->fillHouseData(houseNames[j]);
+		house->fillHouseData(houseName.first,stringErrorMSGHouse);
 		if (stringErrorMSGHouse == "") {
 			houseState state;
 			Point point(-1, -1);
 			if ((state = house->checkIfHouseLegal(point)) != GOOD_HOUSE)
-				(*errorHouse)[houseNames[j]] = ConvertHouseStatetoString(state);
+				(*errorHouse)[houseName.first] = ConvertHouseStatetoString(state);
 			else
 				(*houses).push_back(house);
 		}
 		else
-			(*errorHouse)[houseNames[j]] = stringErrorMSGHouse;
+			(*errorHouse)[houseName.first] = stringErrorMSGHouse;
 	}
 	return houses->size();
 }
-
-void checkArguments(int argc, char** argv, string& config_fileName, vector<string>* houses_fileName, bool* input_house,
-	bool* input_config) {
-	if (argc > 1) { //there are command-line arguments
-		for (int i = 1; i < argc; ++i) {
-
-			if (hasEnding(argv[i], ".ini")) {
-				fs::path p(argv[i]);
-				fs::path full_p = fs::complete(p); // complete == absolute
-				config_fileName = full_p.stem().string();
-				*input_config = false;
-			}
-			else if (hasEnding(argv[i], ".house")) {
-				fs::path p(argv[i]);
-				fs::path full_p = fs::complete(p); // complete == absolute
-				(*houses_fileName).push_back(full_p.stem().string());
-				*input_house = false;
-			}
-		}
+int findIndexOfElem(vector<string> Names,string name) {
+	auto it = std::find(Names.begin(), Names.end(), name);
+	if (it == Names.end())
+	{
+		return -1;
+	}
+	else
+	{
+		return  std::distance(Names.begin(), it);
 	}
 }
+void checkArguments(int argc, char** argv, string& config_path, string& algo_path,string& house_path) {
+	vector<string> commandLineOptions(argc - 1);
+	for (int i = 1; i < argc; i++)
+		commandLineOptions[i-1] = argv[i];
+	int pos_algo = findIndexOfElem(commandLineOptions, ALGO_COMMAND);
+	if (pos_algo < static_cast<int>(commandLineOptions.size()) - 1 && pos_algo != -1)
+		algo_path = commandLineOptions[pos_algo + 1];
+	else
+		algo_path = fs::current_path().string();
+	int pos_house = findIndexOfElem(commandLineOptions, HOUSE_COMMAND);
+	if (pos_house < static_cast<int>(commandLineOptions.size()) - 1 && pos_house != -1)
+		house_path = commandLineOptions[pos_house + 1];
+	else
+		house_path = fs::current_path().string();
+	 int pos_config = findIndexOfElem(commandLineOptions, CONFIG_PATH);
+	 if (pos_config < static_cast<int>(commandLineOptions.size()) - 1 && pos_config != -1)
+		 config_path = commandLineOptions[pos_config + 1];
+	 else
+		 config_path = fs::current_path().string();
+}
+
+
 
 void updateCurrDir(vector<fs::path>* fileName_currDir) {
 	//at least one of the arguments were missing
@@ -175,4 +165,25 @@ void updateCurrDir(vector<fs::path>* fileName_currDir) {
 			}
 		}
 	}
+}
+
+bool updateFilesFromDirectory(map<string,string>& fileNameMap, string typeFiles, string directory) {
+	fs::path p(directory);
+	fs::path fullpath_dir(fs::complete(p));
+	fs::directory_iterator end_iter;
+	if (fs::exists(fullpath_dir) && fs::is_directory(fullpath_dir)) {
+		for (fs::directory_iterator dir_iter(fullpath_dir); dir_iter != end_iter; dir_iter++) {
+			if (fs::is_regular_file(dir_iter->status())) {
+				fs::path path = *dir_iter;
+				if (hasEnding(path.string(), typeFiles))
+					fileNameMap[path.string()] = path.stem().string();
+			}
+		}
+	}
+	return fileNameMap.size() > 0;
+}
+
+void Usage(string house_path, string config_path, string algo_path) {
+	cout << "Usage: simulator [­config " + config_path + "] [­house_path " + house_path + "] [­algorithm_path " + algo_path + "] " << endl;
+
 }

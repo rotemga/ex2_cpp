@@ -8,4 +8,3 @@ public:
 	virtual Direction step() override;
 
 };
-

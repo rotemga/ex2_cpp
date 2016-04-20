@@ -1,41 +1,65 @@
 #include "FuncForMain.h"
+#include <dlfcn.h>
 
+typedef AbstractAlgorithm* (*algoCreator)();
 int main(int argc, char* argv[]) {
-	srand(static_cast<unsigned int>(time(NULL)));
-	bool input_house = true, input_config = true;
-	string tmp = argv[0];
-	string config_fileName;
-	vector<string> houses_fileName;
+	string config_path,house_path,algo_path;
+	map<string, string> houses_mapName, algo_mapName, config_mapName;
 	vector <fs::path> fileName_currDir;
 	vector <House*> houses;
 	vector <AbstractAlgorithm*> algos;
 	map<string, int> config;
 	map<string, string> ErrorMSGHouse;
-	vector<string> houseOnlyName;
-
-	checkArguments(argc, argv, config_fileName, &houses_fileName, &input_house, &input_config);
-	if ((input_house) || (input_config))
-		updateCurrDir(&fileName_currDir);
-	findHousesAndConfigFiles(fileName_currDir, &houses_fileName, config_fileName, input_config, input_house, &houseOnlyName);
-	if (!checkConfig(config_fileName, &config))
+	map<string, string> ErrorMSGAlgo;
+	checkArguments(argc, argv, config_path,algo_path,house_path);
+	if (!updateFilesFromDirectory(houses_mapName, ".house", house_path) || !updateFilesFromDirectory(algo_mapName, ".so", algo_path) ||
+		!updateFilesFromDirectory(config_mapName, ".ini", config_path)) {
+		Usage(house_path, config_path, algo_path);
 		return 1;
-	AbstractAlgorithm* Algo = new _203246509_A();
-	AbstractAlgorithm* Algo2 = new _203246509_B();
-	AbstractAlgorithm* Algo3 = new _203246509_C();
-	algos.push_back(Algo);
-	algos.push_back(Algo2);
-	algos.push_back(Algo3);
-
-
-	if (checkHouses(houses_fileName, &houses, &ErrorMSGHouse) > 0) {
+	}
+	int numberOfValidHouses = checkHouses(houses_mapName, &houses, &ErrorMSGHouse);
+	if (config_mapName.size() < 1) {
+		cout << "config file does not exist" << endl;
+		return 1;
+	}
+	if (!checkConfig(config_mapName.begin()->first, &config))
+		return 1;
+	for (auto algoSoFilesNames : algo_mapName) {
+		const char* tmpname = algoSoFilesNames.first.c_str();
+		void* handler = dlopen(tmpname, RTLD_NOW);
+		if (handler == nullptr) {
+			ErrorMSGAlgo[algoSoFilesNames.first] = "file cannot be loaded or is not a valid .so";
+			continue;
+		}
+		algoCreator alg;
+		*(void **)(&alg) = dlsym(handler, "maker");
+		if (alg == nullptr) {
+			ErrorMSGAlgo[algoSoFilesNames.first] = "valid .so but no algorithm was registered after loading it";
+			continue;
+		}
+		AbstractAlgorithm* loadedAlgo = alg();
+		algos.push_back(loadedAlgo);
+	}
+	int numberOfValidAlgo = algos.size();
+	cout << numberOfValidHouses << numberOfValidAlgo << endl;
+	if (numberOfValidAlgo && numberOfValidHouses) {
 		Simulator sim(houses, algos, config);
-		sim.run(houseOnlyName);
+		vector<string> algoOnlyNames, houseonlyNames;
+		createVcetorFromMapValues(algoOnlyNames, algo_mapName,ErrorMSGAlgo);
+		createVcetorFromMapValues(houseonlyNames, houses_mapName,ErrorMSGHouse);
+		sim.run(algoOnlyNames,houseonlyNames);
 	}
-	PrintErrors(ErrorMSGHouse);
-	for (auto it = houses.begin(); it != houses.end(); ++it) {
+	if (ErrorMSGHouse.size() > 0 || ErrorMSGAlgo.size() > 0) {
+		cout << "Errors:" << endl;
+		PrintErrors(ErrorMSGHouse, houses_mapName, "house");
+		if (algos.size() == 0)
+			cout << "All algorithm files in target folder " << " cannot be opened or are invalid :" << endl;
+		PrintErrors(ErrorMSGAlgo, algo_mapName, "so");
+	}
+	for (auto it = houses.begin(); it != houses.end(); it++)
 		delete *it;
-	}
 	houses.clear();
 	algos.clear();
+
 	return 0;
 }

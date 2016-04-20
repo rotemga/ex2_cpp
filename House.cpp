@@ -15,11 +15,11 @@ House::~House() {
 	delete[] matrix;
 }
 
-House::House(const House& house2){//copy c'tor
+House::House(const House& house2) {//copy c'tor
 	*this = house2;
 }
 
-House& House::operator=(const House& house2){// '=' operator
+House& House::operator=(const House& house2) {// '=' operator
 	int maxSteps = house2.maxSteps;
 	int R = house2.getR();
 	int C = house2.getC();
@@ -50,7 +50,7 @@ House& House::operator=(const House& house2){// '=' operator
 
 
 
-House* House::newCopyOfHouse(){
+House* House::newCopyOfHouse() {
 	string* newMatrix = new string[R];
 	for (int i = 0; i < R; ++i)
 	{
@@ -100,15 +100,15 @@ char& House::findDirtLevel(int x, int y) const {
 }
 //if the house is llegal return true, else false.
 
-houseState House::checkIfHouseLegal(Point& point){
+houseState House::checkIfHouseLegal(Point& point) {
 	completeMissingBlanks();
 	eliminateStrangeChar();
-	if (findDockingStation(point) == 0){
+	if (findDockingStation(point) == 0) {
 		return NO_DOCKING;
 	}
 	putWallsOnSides();
 	int numberOfDockingStations = findDockingStation(point);
-	if (numberOfDockingStations == 0){
+	if (numberOfDockingStations == 0) {
 		return NO_DOCKING;
 	}
 	else if (numberOfDockingStations > 1) {
@@ -245,10 +245,10 @@ pointState House::findPointState(const Point& point) const {
 void House::getInfo(Point& currPoint, SensorInformation& info) const {
 	int x = currPoint.getX();
 	int y = currPoint.getY();
-	if (matrix[x][y] == 'D' || matrix[x][y] == 'W' || matrix[x][y] == ' '){
+	if (matrix[x][y] == 'D' || matrix[x][y] == 'W' || matrix[x][y] == ' ') {
 		info.dirtLevel = 0;
 	}
-	else{
+	else {
 		info.dirtLevel = matrix[x][y] - '0';
 	}
 

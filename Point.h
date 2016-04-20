@@ -59,7 +59,7 @@ public:
 
 	bool operator<(const Point& point)const;
 	bool operator==(const Point& point)const;
-	Point* Point::newCopyOfPoint();
+	Point* newCopyOfPoint();
 };
 
 #endif /* POINT_H_ */

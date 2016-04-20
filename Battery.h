@@ -42,9 +42,6 @@ public:
 	void setRachRate(int rachRate) {
 		this->rachRate = rachRate;
 	}
-	int getCurrentState() const {
-		return currentState;
-	}
 };
 
 #endif /* BATTERY_H_ */

@@ -27,10 +27,10 @@ void Robot::runRobot() {
 			score.setPosition(10);
 			return;
 		}
-	//	algo->setSensor(*sensor);
+		//	algo->setSensor(*sensor);
 
 		Direction direction = algo->step(); //should check if direction is legal
-		//cout << "Direction: " << this->DirectionToString(direction) << endl << endl;
+											//cout << "Direction: " << this->DirectionToString(direction) << endl << endl;
 		position->move(direction);
 		sensor->setPoint(position);
 
@@ -62,9 +62,9 @@ void Robot::updateBattery(Point& point, Battery& battery) {
 	}
 }
 
-void Robot::updatePositionDirt(Point& point){
+void Robot::updatePositionDirt(Point& point) {
 	int dirt = house->currentValue(point.getX(), point.getY());
-	if (dirt > 0){
+	if (dirt > 0) {
 		house->cleanDirtyPoint(point);
 	}
 }
@@ -76,14 +76,14 @@ bool Robot::areWeInDocking() const {
 	return house->findPointState(*position) == DOCKING;
 }
 
-int Robot::DirtCollected(){
+int Robot::DirtCollected() {
 	return (score.getSumDirtInHouse() - house->sumDirt());
 }
-int Robot::sumDirtInHouse(){
+int Robot::sumDirtInHouse() {
 	return(house->sumDirt());
 }
 
-void Robot::printHouse(){
+void Robot::printHouse() {
 	string* matrix = house->getMatrix();
 	cout << "Printing house from instance into standard output" << endl;
 	for (int i = 0; i < house->getR(); ++i)
@@ -99,8 +99,8 @@ void Robot::printHouse(){
 
 
 
-string Robot::DirectionToString(Direction d){
-	switch (d){
+string Robot::DirectionToString(Direction d) {
+	switch (d) {
 	case Direction::East:
 		return "East";
 

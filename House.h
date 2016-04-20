@@ -27,7 +27,7 @@ public:
 	House();
 	House(const House&);//copy c'tor
 	House& operator=(const House&);// '=' operator
-	House* House::newCopyOfHouse();
+	House* newCopyOfHouse();
 	void cleanDirtyPoint(const Point& point);
 	pointState findPointState(const Point& point) const;
 	int currentValue(int x, int y) const;

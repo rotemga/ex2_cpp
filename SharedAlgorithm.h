@@ -52,7 +52,7 @@ public:
 	int charToDirtLevel(char c);
 	Direction chooseStep(float score_for_star);
 	Direction reverseDirection(Direction direct, Point *wanted_point);
-	bool SharedAlgorithm::checkIfAlgoStack();
+	bool checkIfAlgoStack();
 
 };
 

@@ -29,7 +29,7 @@ OurSensor& OurSensor::operator=(const OurSensor& sensor2) {// '=' operator
 
 
 
-void OurSensor::setInfo(const SensorInformation& Info){//update the sesnor with new information
+void OurSensor::setInfo(const SensorInformation& Info) {//update the sesnor with new information
 	sensorInfo.dirtLevel = Info.dirtLevel;
 	for (size_t i = 0; i < 4; ++i) {
 		sensorInfo.isWall[i] = Info.isWall[i];
@@ -38,11 +38,11 @@ void OurSensor::setInfo(const SensorInformation& Info){//update the sesnor with 
 
 
 
-SensorInformation OurSensor::sense() const{
+SensorInformation OurSensor::sense() const {
 	return this->sensorInfo;
 }
 
-void OurSensor::getInfoFromPoint(){
+void OurSensor::getInfoFromPoint() {
 	//SensorInformation tmp;
 	thisHouse->getInfo(*currPoint, sensorInfo);
 	//setInfo(tmp);

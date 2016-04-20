@@ -19,7 +19,7 @@ SharedAlgorithm::~SharedAlgorithm()
 }
 
 
-void SharedAlgorithm::setSensor(const AbstractSensor& sensor){
+void SharedAlgorithm::setSensor(const AbstractSensor& sensor) {
 	map_info.clear();
 	moves.clear();
 	thisSensor = &sensor;
@@ -36,19 +36,19 @@ void SharedAlgorithm::setSensor(const AbstractSensor& sensor){
 
 }
 
-void SharedAlgorithm::setConfiguration(map<string, int> config){
+void SharedAlgorithm::setConfiguration(map<string, int> config) {
 	thisConfig = config;
 	CurrBattery = thisConfig.at("BatteryCapacity");
 	ConRateBattery = thisConfig.at("BatteryConsumptionRate");
 	BatteryRechargeRate = thisConfig.at("BatteryRechargeRate");
 
 }
-Direction SharedAlgorithm::step(){
+Direction SharedAlgorithm::step() {
 	return Direction::Stay;
 }
 
 
-void SharedAlgorithm::aboutToFinish(int stepsTillFinishing){
+void SharedAlgorithm::aboutToFinish(int stepsTillFinishing) {
 	StepsTillFinishing = stepsTillFinishing;
 }
 
@@ -59,16 +59,18 @@ void SharedAlgorithm::aboutToFinish(int stepsTillFinishing){
 
 
 // '*' we know it's not a wall
-void SharedAlgorithm::updateMapInfo(SensorInformation info){
+void SharedAlgorithm::updateMapInfo(SensorInformation info) {
 	int x = currPoint->getX();
 	int y = currPoint->getY();
-	if (currPoint->isInDocking()){ 
-		map_info[Point(x, y)] = 'D'; } //in docking
-	else{ 
+	if (currPoint->isInDocking()) {
+		map_info[Point(x, y)] = 'D';
+	} //in docking
+	else {
 		int i = info.dirtLevel;
-		if (i > 0){ i = i - 1; }
+		if (i > 0) { i = i - 1; }
 		char c = i + '0';
-		map_info[Point(x, y)] = c; } //stay
+		map_info[Point(x, y)] = c;
+	} //stay
 	if (!map_info.count(Point(x, y + 1)))
 		map_info[Point(x, y + 1)] = ((info.isWall[0]) ? 'W' : '*'); //east
 	if (!map_info.count(Point(x, y - 1)))
@@ -79,15 +81,15 @@ void SharedAlgorithm::updateMapInfo(SensorInformation info){
 		map_info[Point(x - 1, y)] = ((info.isWall[3]) ? 'W' : '*'); //north
 }
 
-void  SharedAlgorithm::updatePointDirt(){
+void  SharedAlgorithm::updatePointDirt() {
 	int dirt = (int)(map_info[*currPoint] - '0');
-	if ((map_info[*currPoint] != 'D') && (dirt > 0)){
+	if ((map_info[*currPoint] != 'D') && (dirt > 0)) {
 		map_info[*currPoint]--;
 	}
 }
 
 
-Direction SharedAlgorithm::directionToDocking( Point* wanted_point){
+Direction SharedAlgorithm::directionToDocking(Point* wanted_point) {
 	int x = currPoint->getX(), y = currPoint->getY();
 	map<Point, int> m;
 	legalMoves(m, 1);
@@ -96,8 +98,8 @@ Direction SharedAlgorithm::directionToDocking( Point* wanted_point){
 		num_of_steps = 0;
 		return Direction::Stay;
 	}
-	else if (y > 0){//need to go west
-		if (m.count(Point(x, y - 1))){
+	else if (y > 0) {//need to go west
+		if (m.count(Point(x, y - 1))) {
 			wanted_point->setPoint(x, y - 1);
 			return Direction::West;
 		}
@@ -105,8 +107,8 @@ Direction SharedAlgorithm::directionToDocking( Point* wanted_point){
 
 
 	}
-	else if (y < 0){//nead to go east
-		if (m.count(Point(x, y + 1))){
+	else if (y < 0) {//nead to go east
+		if (m.count(Point(x, y + 1))) {
 			wanted_point->setPoint(x, y + 1);
 			return Direction::East;
 		}
@@ -117,15 +119,15 @@ Direction SharedAlgorithm::directionToDocking( Point* wanted_point){
 	}
 }
 
-Direction SharedAlgorithm::forDirectionToDockingFunc(int x, int y, map <Point, int> m, Point* wanted_point){
+Direction SharedAlgorithm::forDirectionToDockingFunc(int x, int y, map <Point, int> m, Point* wanted_point) {
 	if (x > 0) {//need to go north
-		if (m.count(Point(x - 1, y))){
+		if (m.count(Point(x - 1, y))) {
 			wanted_point->setPoint(x - 1, y);
 			return Direction::North;
 		}
 	}
-	else if (x < 0){//need to go south
-		if (m.count(Point(x + 1, y))){
+	else if (x < 0) {//need to go south
+		if (m.count(Point(x + 1, y))) {
 			wanted_point->setPoint(x + 1, y);
 			return Direction::South;
 		}
@@ -144,7 +146,7 @@ Direction SharedAlgorithm::forDirectionToDockingFunc(int x, int y, map <Point, i
 
 
 //return true if the algo have enough battery to go back to docking station.
-bool SharedAlgorithm::canGoBackToDocking(){
+bool SharedAlgorithm::canGoBackToDocking() {
 	if (currPoint->isInDocking()) return true;
 	int minPath = findMinPathToDocking(0, 0);
 	return ((CurrBattery - minPath*ConRateBattery) > 0) ? true : false;
@@ -153,12 +155,12 @@ bool SharedAlgorithm::canGoBackToDocking(){
 
 
 //return the length of the minimal path from current point to docking.
-int SharedAlgorithm::findMinPathToDocking(int cnt, int ok){
+int SharedAlgorithm::findMinPathToDocking(int cnt, int ok) {
 
 	map<Point, int> m;
 	int min = map_info.size();
 
-	if (currPoint->isInDocking()){
+	if (currPoint->isInDocking()) {
 		ok = 1;
 		return cnt;
 	}
@@ -166,13 +168,13 @@ int SharedAlgorithm::findMinPathToDocking(int cnt, int ok){
 		return cnt;
 	if (cnt >= min)
 		return cnt;
-	else{
+	else {
 		legalMoves(m, 1);//update m to be only legal directions (no option to stay in place)
 		map<Point, int>::iterator it;
 		for (it = m.begin(); it != m.end(); it++) {//iterate over all legal moves
 			cnt = findMinPathToDocking(++cnt, ok);
 
-			if (cnt < min){
+			if (cnt < min) {
 				min = cnt;
 				if (ok == 1) return min;
 			}
@@ -183,11 +185,11 @@ int SharedAlgorithm::findMinPathToDocking(int cnt, int ok){
 }
 
 
-void SharedAlgorithm::printMap(map<Point, int> m, Point point){
+void SharedAlgorithm::printMap(map<Point, int> m, Point point) {
 	cout << "CurrPoint is: (" << point.getX() << " ," << point.getY() << ")" << " we have in it :" << m[point] << endl;
 	map<Point, int>::iterator it;
 	cout << "Size of Map: " << m.size() << " ,legal moves: ";
-	for (it = m.begin(); it != m.end(); it++){
+	for (it = m.begin(); it != m.end(); it++) {
 		cout << DirectionToString(changePointToDirection(it->first)) << " (" << it->first.getX() << " ," << it->first.getY() << ")" << "   ";
 	}
 	cout << endl;
@@ -222,8 +224,8 @@ void SharedAlgorithm::printCurrMap(map <Point, char> m) {
 }
 
 //get direction and return char* of it
-char* SharedAlgorithm::DirectionToString(Direction d){
-	switch (d){
+char* SharedAlgorithm::DirectionToString(Direction d) {
+	switch (d) {
 	case Direction::East:
 		return "East";
 
@@ -249,7 +251,7 @@ char* SharedAlgorithm::DirectionToString(Direction d){
 
 //get score_for_star and wanted_point as inputs
 //update wanted_point to be best point to move to it.
-Direction SharedAlgorithm::get_Move(Point* wanted_point, float score_for_star){
+Direction SharedAlgorithm::get_Move(Point* wanted_point, float score_for_star) {
 	float max_score = -2, east = -2, west = -2, south = -2, north = -2, stay = 0;
 	int x = currPoint->getX(), y = currPoint->getY();
 	map<Point, int> m;
@@ -262,15 +264,15 @@ Direction SharedAlgorithm::get_Move(Point* wanted_point, float score_for_star){
 	//	return reverseDirection(direct, wanted_point);
 	//}
 
-	if (StepsTillFinishing != -1){
-		if (StepsTillFinishing*ConRateBattery >= CurrBattery){//if we don't have enough steps, we must go back to docking
+	if (StepsTillFinishing != -1) {
+		if (StepsTillFinishing*ConRateBattery >= CurrBattery) {//if we don't have enough steps, we must go back to docking
 			num_of_steps++;
 			//return directionToDocking(wanted_point);
 			direct = moves[moves.size() - 1];
 			return reverseDirection(direct, wanted_point);
 		}
 	}
-	if (moves.size()*ConRateBattery + 1 >= CurrBattery){//(CurrBattery <= (map_info.size() / 2)))//if we don't have enough battery, we must go back to docking
+	if (moves.size()*ConRateBattery + 1 >= CurrBattery) {//(CurrBattery <= (map_info.size() / 2)))//if we don't have enough battery, we must go back to docking
 		num_of_steps++;
 		//return directionToDocking(wanted_point);
 		direct = moves[moves.size() - 1];
@@ -280,49 +282,49 @@ Direction SharedAlgorithm::get_Move(Point* wanted_point, float score_for_star){
 	map<Point, int>::iterator it;
 	for (it = m.begin(); it != m.end(); it++) {//iterate over all legal moves
 
-		if ((it->first.getY() == y + 1) && ((it->first.getX() == x))){//east
+		if ((it->first.getY() == y + 1) && ((it->first.getX() == x))) {//east
 			east = ((it->second >= 0) ? it->second : ((it->second == -1) ? 0 : score_for_star));
 		}
-		else if ((it->first.getY() == y - 1) && ((it->first.getX() == x))){//west
+		else if ((it->first.getY() == y - 1) && ((it->first.getX() == x))) {//west
 			west = ((it->second >= 0) ? it->second : ((it->second == -1) ? 0 : score_for_star));
 		}
-		else if ((it->first.getX() == x + 1) && ((it->first.getY() == y))){//south
+		else if ((it->first.getX() == x + 1) && ((it->first.getY() == y))) {//south
 			south = ((it->second >= 0) ? it->second : ((it->second == -1) ? 0 : score_for_star));
 		}
-		else if ((it->first.getX() == x - 1) && ((it->first.getY() == y))){//north
+		else if ((it->first.getX() == x - 1) && ((it->first.getY() == y))) {//north
 			north = ((it->second >= 0) ? it->second : ((it->second == -1) ? 0 : score_for_star));
 		}
-		else if ((it->first.getX() == x) && ((it->first.getY() == y))){//stay
+		else if ((it->first.getX() == x) && ((it->first.getY() == y))) {//stay
 			stay = ((it->second >= 0) ? it->second : ((it->second == -1) ? 0 : score_for_star));
 		}
 	}
 	num_of_steps++;
 	max_score = std::max(std::max(east, west), std::max(std::max(south, north), stay));
-	if (max_score == 0){//if all legal direction with no dirt, check in which direction there are most stars
+	if (max_score == 0) {//if all legal direction with no dirt, check in which direction there are most stars
 		return mostStars(wanted_point);
 	}
 
-	if (east == max_score){
+	if (east == max_score) {
 		wanted_point->setPoint(x, y + 1);
 		moves[num_of_steps - 1] = Direction::East;
 		return  Direction::East;
 	}
-	else if (west == max_score){
+	else if (west == max_score) {
 		wanted_point->setPoint(x, y - 1);
 		moves[num_of_steps - 1] = Direction::West;
 		return  Direction::West;
 	}
-	else if (south == max_score){
+	else if (south == max_score) {
 		wanted_point->setPoint(x + 1, y);
 		moves[num_of_steps - 1] = Direction::South;
 		return  Direction::South;
 	}
-	else if (north == max_score){
+	else if (north == max_score) {
 		wanted_point->setPoint(x - 1, y);
 		moves[num_of_steps - 1] = Direction::North;
 		return  Direction::North;
 	}
-	else if (stay == max_score){
+	else if (stay == max_score) {
 		wanted_point->setPoint(x, y);
 		num_of_steps--;
 		return  Direction::Stay;
@@ -332,7 +334,7 @@ Direction SharedAlgorithm::get_Move(Point* wanted_point, float score_for_star){
 
 }
 
-Direction SharedAlgorithm::mostStars(Point* wanted_point){
+Direction SharedAlgorithm::mostStars(Point* wanted_point) {
 	int x = currPoint->getX(), y = currPoint->getY();
 	int tmp, east = 0, west = 0, south = 0, north = 0;
 	Direction direct;
@@ -342,54 +344,54 @@ Direction SharedAlgorithm::mostStars(Point* wanted_point){
 	map<Point, char>::iterator it;
 	for (it = map_info.begin(); it != map_info.end(); it++) {
 		tmp = charToDirtLevel(it->second);
-		if ((it->first.getY() > y) && (tmp > 0 || tmp == -3) && (map_info[Point(x, y + 1)] != 'W')){
+		if ((it->first.getY() > y) && (tmp > 0 || tmp == -3) && (map_info[Point(x, y + 1)] != 'W')) {
 			east += ((tmp > 0) ? tmp : 2);
 		}
 		tmp = charToDirtLevel(it->second);
-		if ((it->first.getY() < y) && (tmp > 0 || tmp == -3) && (map_info[Point(x, y - 1)] != 'W')){
+		if ((it->first.getY() < y) && (tmp > 0 || tmp == -3) && (map_info[Point(x, y - 1)] != 'W')) {
 			west += ((tmp > 0) ? tmp : 2);
 		}
 		tmp = charToDirtLevel(it->second);
-		if ((it->first.getX() > x) && (tmp > 0 || tmp == -3) && (map_info[Point(x + 1, y)] != 'W')){
+		if ((it->first.getX() > x) && (tmp > 0 || tmp == -3) && (map_info[Point(x + 1, y)] != 'W')) {
 			south += ((tmp > 0) ? tmp : 2);
 		}
 		tmp = charToDirtLevel(it->second);
-		if ((it->first.getX() < x) && (tmp > 0 || tmp == -3) && (map_info[Point(x - 1, y)] != 'W')){
+		if ((it->first.getX() < x) && (tmp > 0 || tmp == -3) && (map_info[Point(x - 1, y)] != 'W')) {
 			north += ((tmp > 0) ? tmp : 2);
 		}
 	}
 	int max_score = std::max(std::max(east, west), std::max(south, north));
-	if (max_score == 0){
+	if (max_score == 0) {
 		legalMoves(m, 0);//update m to be only legal directions
-		if (m.size() == 1){
+		if (m.size() == 1) {
 			wanted_point->setPoint(m.begin()->first);
 			return  changePointToDirection(m.begin()->first);
 		}
-		else{//if we can move, we are not to stay in place.
+		else {//if we can move, we are not to stay in place.
 			map<Point, int>::iterator it;
 			for (it = m.begin(); it != m.end(); it++) {//iterate over all legal moves
-				wanted_point->setPoint(it->first); 
+				wanted_point->setPoint(it->first);
 				Direction direct = changePointToDirection(it->first);
-				if (direct != Direction::Stay){
+				if (direct != Direction::Stay) {
 					return direct;
 				}
 			}
 		}
 	}
 
-	if (east == max_score){
+	if (east == max_score) {
 		wanted_point->setPoint(x, y + 1);
 		return  Direction::East;
 	}
-	else if (west == max_score){
+	else if (west == max_score) {
 		wanted_point->setPoint(x, y - 1);
 		return  Direction::West;
 	}
-	else if (south == max_score){
+	else if (south == max_score) {
 		wanted_point->setPoint(x + 1, y);
 		return  Direction::South;
 	}
-	else if (north == max_score){
+	else if (north == max_score) {
 		wanted_point->setPoint(x - 1, y);
 		return  Direction::North;
 	}
@@ -399,11 +401,11 @@ Direction SharedAlgorithm::mostStars(Point* wanted_point){
 
 // get direction and wanted_point,
 // it's reverse the direction and update the wanted_point to be the point is this direction
-Direction SharedAlgorithm::reverseDirection(Direction direct, Point *wanted_point){
+Direction SharedAlgorithm::reverseDirection(Direction direct, Point *wanted_point) {
 	int x = currPoint->getX(), y = currPoint->getY();
 	//cout << "Back to docking, currPoint: (" << x << " ," << y << ")" << endl;
-	moves.erase(moves.size()-1);
-	switch (direct){
+	moves.erase(moves.size() - 1);
+	switch (direct) {
 	case Direction::East:
 		wanted_point->setPoint(x, y - 1);
 		return Direction::West;
@@ -424,15 +426,15 @@ Direction SharedAlgorithm::reverseDirection(Direction direct, Point *wanted_poin
 
 
 //check if algorithm stack in loop. (for example: west east west east...)
-bool SharedAlgorithm::checkIfAlgoStack(){
-	if (moves.size() >= 3){
+bool SharedAlgorithm::checkIfAlgoStack() {
+	if (moves.size() >= 3) {
 		Direction last_direction = moves[moves.size() - 1];
 		Direction second_last_direction = moves[moves.size() - 2];
 		Direction third_last_direction = moves[moves.size() - 3];
 		if (last_direction != third_last_direction)
 			return false;
 		Point* tmp = new Point(0, 0);
-		if (reverseDirection(third_last_direction, tmp) == second_last_direction){
+		if (reverseDirection(third_last_direction, tmp) == second_last_direction) {
 			delete tmp;
 			return true;
 		}
@@ -441,13 +443,13 @@ bool SharedAlgorithm::checkIfAlgoStack(){
 
 }
 //get point as input and return the direction it's provides
-Direction SharedAlgorithm::changePointToDirection(Point newPoint){
+Direction SharedAlgorithm::changePointToDirection(Point newPoint) {
 	int x_cur = currPoint->getX();
 	int y_cur = currPoint->getY();
 	int x_new = newPoint.getX();
 	int y_new = newPoint.getY();
 
-	if (x_cur == x_new){
+	if (x_cur == x_new) {
 		if (y_cur == y_new) { return Direction::Stay; }
 		return ((y_cur + 1 == y_new) ? Direction::East : Direction::West);
 	}
@@ -460,29 +462,29 @@ Direction SharedAlgorithm::changePointToDirection(Point newPoint){
 }
 //get as input map and update it with legal moves (points as key and current information as int)
 //-1 is docking, -2 is wall, -3 is not wall, 0-9 is dirt level.
-void SharedAlgorithm::legalMoves(map<Point, int> &m, int for_min_path){
+void SharedAlgorithm::legalMoves(map<Point, int> &m, int for_min_path) {
 	int x = currPoint->getX();
 	int y = currPoint->getY();
 	int val;
 	Point* tmp = new Point(x, y);
 	if (!for_min_path) m[*currPoint] = charToDirtLevel(map_info[*currPoint]);//insert stay. for func findMinPathToDocking (int for_min_path==1) don't insert stay!
 	tmp->setPoint(x, y + 1);
-	if (map_info.count(*tmp)){
+	if (map_info.count(*tmp)) {
 		if ((val = charToDirtLevel(map_info[*tmp])) != -2)//East not wall
 			m[*tmp] = val;
 	}
 	tmp->setPoint(x, y - 1);
-	if (map_info.count(*tmp)){
+	if (map_info.count(*tmp)) {
 		if ((val = charToDirtLevel(map_info[*tmp])) != -2)//West not wall
 			m[*tmp] = val;
 	}
 	tmp->setPoint(x + 1, y);
-	if (map_info.count(*tmp)){
+	if (map_info.count(*tmp)) {
 		if ((val = charToDirtLevel(map_info[*tmp])) != -2)//South not wall 
 			m[*tmp] = val;
 	}
 	tmp->setPoint(x - 1, y);
-	if (map_info.count(*tmp)){
+	if (map_info.count(*tmp)) {
 		if ((val = charToDirtLevel(map_info[*tmp])) != -2)//North not wall
 			m[*tmp] = val;
 	}
@@ -495,7 +497,7 @@ void SharedAlgorithm::legalMoves(map<Point, int> &m, int for_min_path){
 // -2 = wall
 // -3 = we know it's not wall
 // 0 - 9 = dirt level
-int SharedAlgorithm::charToDirtLevel(char c){
+int SharedAlgorithm::charToDirtLevel(char c) {
 	if (c == 'W') { return -2; }// -2 is wall
 	if (c == 'D') { return -1; }// -1 is docking
 	int tmp = c - '0';
@@ -505,21 +507,21 @@ int SharedAlgorithm::charToDirtLevel(char c){
 
 
 //get score_for_star as input and return direction.
-Direction SharedAlgorithm::chooseStep( float score_for_star){
+Direction SharedAlgorithm::chooseStep(float score_for_star) {
 	SensorInformation a = thisSensor->sense();
 	//thisSensor->setInfo(a);
 	updateMapInfo(a);
-	Point* wanted_point = new Point(0,0);
+	Point* wanted_point = new Point(0, 0);
 	Direction direct = get_Move(wanted_point, score_for_star);
 	currPoint->setPoint(*wanted_point);
-	if (currPoint->isInDocking()){
-		if (CurrBattery < 0){
+	if (currPoint->isInDocking()) {
+		if (CurrBattery < 0) {
 			CurrBattery = 0;
 		}
 		CurrBattery += BatteryRechargeRate;
 		num_of_steps = 0;
 	}
-	else{
+	else {
 		CurrBattery -= ConRateBattery;
 	}
 	//cout << "currPoint: (" << currPoint->getX() << " ," << currPoint->getY() << ")" << endl;
@@ -531,4 +533,3 @@ Direction SharedAlgorithm::chooseStep( float score_for_star){
 	cnt++;
 	return direct;
 }
-

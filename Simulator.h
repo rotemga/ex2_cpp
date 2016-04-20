@@ -31,7 +31,7 @@ class Simulator {
 
 	//void updatePointByDirection(Point& point, Direction direction);
 public:
-	void run(vector<string> houseNames);
+	void run(vector<string> algoNames,vector<string> houseNames);
 	void fillHouses(const string& location);
 	void setInputHouses(vector<House*> input);
 	void setInputConfig(map<string, int> input_config);
