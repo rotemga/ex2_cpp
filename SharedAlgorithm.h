@@ -2,7 +2,8 @@
 #define SHAREDALGORITHM_H_
 
 #include "AbstractAlgorithm.h"
-#include "OurSensor.h"
+#include "AbstractSensor.h"
+#include "Point.h"
 //#include "FuncForAlgos.h"
 #include <algorithm>
 using namespace std;
@@ -51,6 +52,7 @@ public:
 	int charToDirtLevel(char c);
 	Direction chooseStep(float score_for_star);
 	Direction reverseDirection(Direction direct, Point *wanted_point);
+	bool SharedAlgorithm::checkIfAlgoStack();
 
 };
 

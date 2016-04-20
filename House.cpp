@@ -27,19 +27,50 @@ House& House::operator=(const House& house2){// '=' operator
 	string* tmp = house2.getMatrix();
 	for (int i = 0; i < R; ++i)
 	{
+		newMatrix[i].resize(C, 'X');
 		for (int j = 0; j < C; ++j)
 		{
 			newMatrix[i][j] = tmp[i][j];
 		}
 	}
-	this->matrix = newMatrix;
-	this->maxSteps = maxSteps;
-	this->C = C;
-	this->R = R;
-	this->houseDes = house2.houseDes;
-	//this->shortDes = house2.shortDes;
-	return *this;
+	House* newHouse = new House();
+	newHouse->matrix = newMatrix;
+	newHouse->maxSteps = maxSteps;
+	newHouse->C = C;
+	newHouse->R = R;
+	newHouse->houseDes = house2.houseDes;
+
+	//this->matrix = newMatrix;
+	//this->maxSteps = maxSteps;
+	//this->C = C;
+	//this->R = R;
+	//this->houseDes = house2.houseDes;
+	return *newHouse;
 }
+
+
+
+House* House::newCopyOfHouse(){
+	string* newMatrix = new string[R];
+	for (int i = 0; i < R; ++i)
+	{
+		newMatrix[i].resize(C, 'X');
+		for (int j = 0; j < C; ++j)
+		{
+			newMatrix[i][j] = matrix[i][j];
+		}
+	}
+	House* newHouse = new House();
+	newHouse->matrix = newMatrix;
+	newHouse->maxSteps = maxSteps;
+	newHouse->C = C;
+	newHouse->R = R;
+	newHouse->houseDes = houseDes;
+	return newHouse;
+
+}
+
+
 
 int House::currentValue(int x, int y) const {
 	return matrix[x][y];
@@ -97,31 +128,46 @@ inline bool isInteger(const std::string & s)
 	return (*p == 0);
 }
 
-string House::fillHouseData(string& filename) {
+void House::fillHouseData(const string& filename, string& msg) {
 
 	ifstream fin(filename);
 	if (!fin) {
-		return "cannot open file";
+		msg = "cannot open file";
+		return;
 	}
 	getline(fin, houseDes);
-	//std::getline(fin, longDes);
 	string input;
 	std::getline(fin, input);
 	if (!isInteger(input)) {
-		return "line number 2 in house file shall be positive number, found: " + input;
+		msg = "line number 2 in house file shall be positive number, found: " + input;
+		return;
 	}
 	maxSteps = stoi(input);
+	if (maxSteps <= 0) {
+		msg = "line number 2 in house file shall be positive number, found: " + input;
+		return;
+	}
+
 	std::getline(fin, input);
 	if (!isInteger(input)) {
-		return "line number 3 in house file shall be a positive number, found: " + input;
+		msg = "line number 3 in house file shall be a positive number, found: " + input;
+		return;
 	}
 	R = stoi(input);
+	if (R <= 0) {
+		msg = "line number 3 in house file shall be positive number, found: " + input;
+		return;
+	}
 	std::getline(fin, input);
 	if (!isInteger(input)) {
-		return "line number 4 in house file shall be a positive number, found: " + input;
+		msg = "line number 4 in house file shall be a positive number, found: " + input;
+		return;
 	}
 	C = stoi(input);
-	//fin.ignore(); //skip newline and go the begining of matrix
+	if (C <= 0) {
+		msg = "line number 4 in house file shall be positive number, found: " + input;
+		return;
+	}
 	matrix = new string[R];
 	for (int i = 0; i < R; ++i) {
 		matrix[i].resize(C, 'X');
@@ -131,7 +177,7 @@ string House::fillHouseData(string& filename) {
 		for (int j = 0; j < numOfCharsToFill; j++)
 			matrix[i][j] = buffer[j];
 	}
-	return "";
+	msg = "";
 }
 
 void House::completeMissingBlanks() {

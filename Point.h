@@ -57,12 +57,9 @@ public:
 	}
 
 
-	bool operator<(const Point& point)const {
-		return std::make_tuple(x, y) < std::make_tuple(point.getX(), point.getY());
-	}
-	bool operator==(const Point& point)const{
-		return (x == point.getX() && y == point.getY());
-	}
+	bool operator<(const Point& point)const;
+	bool operator==(const Point& point)const;
+	Point* Point::newCopyOfPoint();
 };
 
 #endif /* POINT_H_ */

@@ -19,10 +19,13 @@ int main(int argc, char* argv[]) {
 	findHousesAndConfigFiles(fileName_currDir, &houses_fileName, config_fileName, input_config, input_house, &houseOnlyName);
 	if (!checkConfig(config_fileName, &config))
 		return 1;
-	AbstractAlgorithm* Algo = new _203246509_B();
-	AbstractAlgorithm* Algo2 = new _203246509_C();
+	AbstractAlgorithm* Algo = new _203246509_A();
+	AbstractAlgorithm* Algo2 = new _203246509_B();
+	AbstractAlgorithm* Algo3 = new _203246509_C();
 	algos.push_back(Algo);
 	algos.push_back(Algo2);
+	algos.push_back(Algo3);
+
 
 	if (checkHouses(houses_fileName, &houses, &ErrorMSGHouse) > 0) {
 		Simulator sim(houses, algos, config);

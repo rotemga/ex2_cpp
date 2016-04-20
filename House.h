@@ -27,6 +27,7 @@ public:
 	House();
 	House(const House&);//copy c'tor
 	House& operator=(const House&);// '=' operator
+	House* House::newCopyOfHouse();
 	void cleanDirtyPoint(const Point& point);
 	pointState findPointState(const Point& point) const;
 	int currentValue(int x, int y) const;
@@ -34,7 +35,7 @@ public:
 	char& findDirtLevel(int x, int y) const;
 	houseState checkIfHouseLegal(Point& point);
 	virtual ~House();
-	string fillHouseData(string& filename);
+	void fillHouseData(const string& filename, string& msg);
 	void completeMissingBlanks();
 	void eliminateStrangeChar();
 	void putWallsOnSides();

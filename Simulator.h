@@ -18,6 +18,10 @@
 #include "Battery.h"
 #include "Point.h"
 using namespace std;
+#define MAX_STEPS_AFTER_WINNER "MaxStepsAfterWinner"
+#define BATTERY_CON_RATE "BatteryConsumptionRate"
+#define BATTERY_CAPACITY "BatteryCapacity"
+#define BATTERY_RECHARGE_RATE "BatteryRechargeRate"
 
 class Simulator {
 	vector <House*> houses;

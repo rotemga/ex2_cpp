@@ -30,7 +30,7 @@ void Robot::runRobot() {
 	//	algo->setSensor(*sensor);
 
 		Direction direction = algo->step(); //should check if direction is legal
-		cout << "Direction: " << this->DirectionToString(direction) << endl << endl;
+		//cout << "Direction: " << this->DirectionToString(direction) << endl << endl;
 		position->move(direction);
 		sensor->setPoint(position);
 
@@ -39,6 +39,7 @@ void Robot::runRobot() {
 			brokedDown = true;
 			return;
 		}
+		//house->output();
 		sensor->getInfoFromPoint(house, position);
 		score.setNumSteps(score.getNumSteps() + 1);
 	}

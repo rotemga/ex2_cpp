@@ -66,7 +66,7 @@ void Simulator::run(vector<string> houseNames) {
 
 	vector <Robot*> robots;
 	Score score;
-
+	int aboutToFinish = 0;
 
 	for (vector<AbstractAlgorithm*>::size_type i = 0; i != algorithms.size(); i++) {
 		algorithms[i]->setConfiguration(config);
@@ -81,8 +81,10 @@ void Simulator::run(vector<string> houseNames) {
 		houses[i]->findDockingStation(*point);
 		for (vector<AbstractAlgorithm*>::size_type j = 0; j != algorithms.size(); j++){
 			// robot for all pair <house,algorithm>
-			Battery* battery = new Battery(config.at("BatteryCapacity"), config.at("BatteryConsumptionRate"), config.at("BatteryRechargeRate"));
-			Robot* robot = new Robot(houses[i], algorithms[j], point, battery);
+			House* tmp_house = houses[i]->newCopyOfHouse();
+			Point* tmp_point = point->newCopyOfPoint();
+			Battery* battery = new Battery(config.at(BATTERY_CAPACITY), config.at(BATTERY_CON_RATE), config.at(BATTERY_RECHARGE_RATE));
+			Robot* robot = new Robot(tmp_house, algorithms[j], tmp_point, battery);
 			robots.push_back(robot);
 		}
 		houses[i]->output();
@@ -91,8 +93,12 @@ void Simulator::run(vector<string> houseNames) {
 				if (!robots[k]->isCanRun())
 					continue;
 				robots[k]->runRobot();
-				if (robotWin(robots[k])){//robot win, update Steps and it's score
-					Steps = config.at("MaxStepsAfterWinner") + 1;
+
+				if (robotWin(robots[k])){//robot win, update Steps and it's score 
+					if (aboutToFinish == 0){//call aboutToFinish of all algos unless the function updated MAX_STEPS_AFTER_WINNER before.
+						aboutToFinish = 1;
+						Steps = config.at(MAX_STEPS_AFTER_WINNER) + 1;
+					}
 					if (winner_num_steps == 0){
 						winner_num_steps = simulation_steps;
 					}
@@ -102,6 +108,14 @@ void Simulator::run(vector<string> houseNames) {
 					robots[k]->setCanRun(false);
 					robots[k]->setScore(score);
 
+
+				}
+				if (houses[i]->getmaxSteps() - config.at(MAX_STEPS_AFTER_WINNER) == simulation_steps){
+					if (aboutToFinish == 0){
+						aboutToFinish = 1;
+						Steps = config.at(MAX_STEPS_AFTER_WINNER) + 1;
+					}
+
 				}
 
 			}
@@ -109,12 +123,18 @@ void Simulator::run(vector<string> houseNames) {
 				break;
 			simulation_steps++;
 			Steps--;
-			if (num_of_wins_this_iter > 0){
-				actual_position_in_copmetition += num_of_wins_this_iter;
+			if (aboutToFinish == 1){//update all algorithms on MAX_STEPS_AFTER_WINNER
+				aboutToFinish = -1;
+				for (vector<AbstractAlgorithm*>::size_type j = 0; j != algorithms.size(); j++)
+					algorithms[j]->aboutToFinish(config.at(MAX_STEPS_AFTER_WINNER));
 			}
-			houses[i]->output();
+
 
 		}
+		if (num_of_wins_this_iter > 0){
+			actual_position_in_copmetition += num_of_wins_this_iter;
+		}
+		num_of_wins_this_iter = 0;
 
 		if (winner_num_steps == 0){
 			winner_num_steps = simulation_steps;
@@ -122,30 +142,31 @@ void Simulator::run(vector<string> houseNames) {
 
 
 
-		for (vector<Robot*>::size_type k = 0; k != robots.size(); k++){
-
+		for (vector<Robot*>::size_type k = i*algorithms.size(); k != robots.size(); k++){
+			//the robot didn't win:
 			//the robot crashed a wall or the battery is empty 
 			//or:
-			//the robot  didn't finish cleaning the house and it can run
+			//the robot  didn't finish cleaning the house and it can run, but it's steps finished
 			if ((robots[k]->isCanRun() || robots[k]->isBrokedDown())){
 				createScore(winner_num_steps, simulation_steps, 10, robots[k]->areWeInDocking(), robots[k]->DirtCollected(), robots[k]->sumDirtInHouse(), &score);
 				robots[k]->setScore(score);
-				//cout <<"the robot didnt win:"  <<score.calcResult() << endl;
 
 
 			}
-			/*	if (robots[k]->isBrokedDown())
-			cout << "battery empty" << endl;*/
+
 		}
-		for (vector<Robot*>::size_type k = 0; k != robots.size(); k++){
-			/*	if (robotWin(robots[k])){//robot win
-			cout << "the robot win" << endl;
-			}
-			robots[k]->printHouse();*/
+		for (vector<Robot*>::size_type k = i*algorithms.size(); k != robots.size(); k++){
+
 			Score s = robots[k]->getScore();
 			cout << s.calcResult() << endl;
 		}
 
+	}
+
+	for (vector<Robot*>::size_type k = 0; k != robots.size(); k++){
+
+		Score s = robots[k]->getScore();
+		cout << "robot num " << k << " score: "<< s.calcResult() << endl;
 	}
 
 	vector<string> algnames = { "algo1_304978372" };
