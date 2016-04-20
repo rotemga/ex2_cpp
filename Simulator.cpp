@@ -173,8 +173,12 @@ void Simulator::run(vector<string> algoNames,vector<string> houseNames) {
 		delete *it;
 	}
 
-	robots.clear();
+	for (auto it = algorithms.begin(); it != algorithms.end(); ++it) {
+		delete *it;
+	}
 
+	robots.clear();
+	algorithms.clear();
 
 
 }

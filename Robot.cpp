@@ -14,6 +14,8 @@ Robot::Robot(House *house, AbstractAlgorithm *algo, Point* docking,
 Robot::~Robot() {
 	delete sensor;
 	delete battery;
+	delete(house);
+	delete(position);
 }
 
 void Robot::runRobot() {

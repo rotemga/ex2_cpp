@@ -14,8 +14,10 @@ SharedAlgorithm::SharedAlgorithm()
 
 SharedAlgorithm::~SharedAlgorithm()
 {
-	delete thisSensor;
+	//delete thisSensor;
 	delete currPoint;
+	map_info.clear();
+	moves.clear();
 }
 
 
